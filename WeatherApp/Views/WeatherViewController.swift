@@ -6,21 +6,32 @@
 //
 
 import UIKit
-
+import CoreLocation
 
 class WeatherViewController: UIViewController {
   
     var weatherManager = WeatherManager()
+    let locationManager = CLLocationManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         layout()
+        
+        locationManager.delegate = self
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.requestLocation()
+        
         searchTextField.delegate = self
         weatherManager.delegate = self
     }
     
+    
     @objc func searchPressed(_ sender: UIButton) {
         searchTextField.endEditing(true)
+    }
+    
+    @objc func locationButtonPressed(_ sender: UIButton) {
+        locationManager.requestLocation()
     }
     
 
@@ -57,6 +68,7 @@ class WeatherViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setBackgroundImage(UIImage(systemName: "location.north.circle.fill"), for: .normal)
         button.tintColor = .label
+        button.addTarget(self, action: #selector(locationButtonPressed), for: .touchUpInside)
         return button
     }()
     
@@ -111,6 +123,7 @@ class WeatherViewController: UIViewController {
 
 
 //MARK: - UITextFieldDelegate
+
 extension WeatherViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         searchTextField.endEditing(true)
@@ -136,7 +149,9 @@ extension WeatherViewController: UITextFieldDelegate {
 }
 
 
-//MARK: - We created Weather Manager delegate required methods
+
+
+//MARK: - WeatherManagerDelegate
 extension WeatherViewController: WeatherManagerDelegate {
     
     func didUpdateWeather(_ weatherManager: WeatherManager, weather: WeatherModel) {
@@ -152,6 +167,27 @@ extension WeatherViewController: WeatherManagerDelegate {
     }
     
 }
+
+
+//MARK: - CLLocationManagerDelegate
+
+extension WeatherViewController: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.last {
+            locationManager.stopUpdatingLocation()
+            let lat = location.coordinate.latitude
+            let lon = location.coordinate.longitude
+            weatherManager.fetchLocationWeather(latitude: lat, longitude: lon)
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print(error)
+    }
+}
+
+
+
 
 //MARK: - Layout
 extension WeatherViewController {
