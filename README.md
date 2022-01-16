@@ -1,4 +1,4 @@
 # WeatherApp
-Programmatically, Networking
+Programmatically, Networking, CoreLocation
 
-<img src="WeatherApp/weathery.gif" width="355"/>
+<img src="WeatherApp/weatherApp.gif" width="355"/>
